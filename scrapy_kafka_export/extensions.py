@@ -27,7 +27,7 @@ In ``settings.py``
 ::
 
     EXTENSIONS = {
-        'scrapy-kafka-export.KafkaItemExporterExtension': 1,
+        'scrapy_kafka_export.KafkaItemExporterExtension': 1,
     }
     
     KAFKA_EXPORT_ENABLED = True
