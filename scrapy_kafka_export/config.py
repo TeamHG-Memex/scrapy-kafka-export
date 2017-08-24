@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from pkg_resources import resource_filename
+from .utils import get_ssl_config
 
 class KafkaItemExporterConfigs(object):
 
@@ -37,10 +38,8 @@ class KafkaItemExporterConfigs(object):
         def get_from_module(module_name, key):
             return resource_filename(module_name, self.settings.get(key))
 
-        return {
-            'security_protocol': 'SSL',
-            'ssl_cafile': get_from_module(module_name, 'SSL_CACERT_FILE'),
-            'ssl_certfile': get_from_module(module_name, 'SSL_CLIENTCERT_FILE'),
-            'ssl_keyfile': get_from_module(module_name, 'SSL_CLIENTKEY_FILE'),
-            'ssl_check_hostname': False
-        }
+        return get_ssl_config(
+            cafile=get_from_module(module_name, 'SSL_CACERT_FILE'),
+            certfile=get_from_module(module_name, 'SSL_CLIENTCERT_FILE'),
+            keyfile=get_from_module(module_name, 'SSL_CLIENTKEY_FILE'),
+        )

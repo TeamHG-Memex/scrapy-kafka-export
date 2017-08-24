@@ -4,7 +4,7 @@ from retrying import retry
 from scrapy.utils.python import to_bytes
 from scrapy.utils.serialize import ScrapyJSONEncoder
 
-from .utils import just_log_exception
+from .utils import just_log_exception, get_ssl_config
 
 _encoder = ScrapyJSONEncoder()
 
@@ -23,6 +23,7 @@ class KafkaTopicWriter(object):
 
     def __init__(self, bootstrap_servers, topic, batch_size,
                  compression_type='gzip', value_serializer=serialize_value,
+                 ssl_cafile=None, ssl_certfile=None, ssl_keyfile=None,
                  **kwargs):
         _kwargs = {
             # unlimited retries by default
@@ -32,6 +33,14 @@ class KafkaTopicWriter(object):
             'request_timeout_ms': 120000,
             'compression_type': compression_type
         }
+
+        if ssl_cafile is not None:
+            self.ssl_config = get_ssl_config(ssl_cafile, ssl_certfile,
+                                             ssl_keyfile)
+            _kwargs.update(self.ssl_config)
+        else:
+            self.ssl_config = {}
+
         _kwargs.update(kwargs)
         self.producer = KafkaProducer(bootstrap_servers=bootstrap_servers,
                                       value_serializer=value_serializer,
