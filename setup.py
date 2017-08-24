@@ -8,7 +8,6 @@ setup(
     install_requires=[
         'scrapy',
         'kafka-python',
-        'msgpack-python',
         'retrying'
     ],
     license='MIT license',
