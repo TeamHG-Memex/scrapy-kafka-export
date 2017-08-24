@@ -1,0 +1,11 @@
+*.pyc
+*.so
+*.html
+.tox
+dist
+build
+_build
+MANIFEST
+.ipynb_checkpoints
+*.egg-info/
+.cache
