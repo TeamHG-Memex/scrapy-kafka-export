@@ -12,17 +12,18 @@ class KafkaKeyedWriter(object):
     def __init__(self, bootstrap_servers, topic, batch_size,
                  compression_type='gzip', value_serializer=msgpack.dumps,
                  **kwargs):
-        kwargs.update({
+        _kwargs = {
             # unlimited retries by default
             'retry_backoff_ms': 30000,
             'batch_size': batch_size,
             'max_request_size': 10 * 1024 * 1024,
             'request_timeout_ms': 120000,
             'compression_type': compression_type
-        })
+        }
+        _kwargs.update(kwargs)
         self.producer = KafkaProducer(bootstrap_servers=bootstrap_servers,
                                       value_serializer=value_serializer,
-                                      **kwargs)
+                                      **_kwargs)
         self.topic = topic
 
     def write(self, key, msg):
