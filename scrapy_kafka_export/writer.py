@@ -57,8 +57,11 @@ class KafkaTopicWriter(object):
         self.producer.close(timeout=self.KAFKA_PRODUCER_CLOSE_TIMEOUT)
 
     def _validate_topic(self):
-        if self.topic not in self._get_topic_list():
-            raise UnknownTopicError("Topic %s does not exist" % self.topic)
+        known_topics = self._get_topic_list()
+        if self.topic not in known_topics:
+            raise UnknownTopicError(
+                "Topic %r does not exist. Known topics: %r" % (
+                    self.topic, known_topics))
 
     @retry(wait_fixed=60000, retry_on_exception=just_log_exception)
     def _send_message(self, key, msg, topic):
