@@ -13,9 +13,9 @@ def serialize_value(value):
     return _encoder.encode(value).encode('utf8')
 
 
-class KafkaKeyedWriter(object):
-    """ Kafka Writer, using gzipped JSON.
-    It retries sending in case of errors.
+class KafkaTopicWriter(object):
+    """ Kafka Writer which puts objects serialized via JSON+gzip
+    to a Kafka topic. It retries sending in case of errors.
     """
 
     # seconds to wait before closing the producer

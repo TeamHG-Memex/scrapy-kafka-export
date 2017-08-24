@@ -83,7 +83,7 @@ from scrapy.exporters import PythonItemExporter
 
 from .utils import just_log_exception
 from .config import KafkaItemExporterConfigs
-from .keyed_writer import KafkaKeyedWriter
+from .writer import KafkaTopicWriter
 
 logger = logging.getLogger(__name__)
 
@@ -126,7 +126,7 @@ class KafkaItemExporterExtension(object):
                          "be send to Kafka.", kafka_topic)
             raise NotConfigured
 
-        self.sources_writer = KafkaKeyedWriter(self.config.kafka_brokers,
+        self.sources_writer = KafkaTopicWriter(self.config.kafka_brokers,
                                                kafka_topic,
                                                self.config.batch_size,
                                                **self.config.ssl_config)
