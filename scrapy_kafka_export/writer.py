@@ -66,16 +66,19 @@ class KafkaTopicWriter(object):
         self.producer.send(topic=topic, value=msg, key=key)
         return True
 
-    @retry(wait_fixed=60000, retry_on_exception=just_log_exception)
     def _get_topic_list(self):
         """ Return a list of all Kafka topics """
         consumer = KafkaConsumer(bootstrap_servers=self.bootstrap_servers,
                                  **self.ssl_config)
+
+        @retry(wait_fixed=60000, retry_on_exception=just_log_exception)
+        def get_topics():
+            return consumer.topics()
+
         try:
-            topics = consumer.topics()
+            return get_topics()
         finally:
             consumer.close()
-        return topics
 
 
 class ScrapyKafkaTopicWriter(KafkaTopicWriter):
