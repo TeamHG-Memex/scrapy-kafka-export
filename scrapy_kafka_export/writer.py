@@ -71,8 +71,7 @@ class KafkaTopicWriter(object):
 
     def _get_topic_list(self):
         """ Return a list of all Kafka topics """
-        consumer = KafkaConsumer(bootstrap_servers=self.bootstrap_servers,
-                                 **self.ssl_config)
+        consumer = self._get_consumer()
 
         @retry(wait_fixed=60000, retry_on_exception=just_log_exception)
         def get_topics():
@@ -82,6 +81,12 @@ class KafkaTopicWriter(object):
             return get_topics()
         finally:
             consumer.close()
+
+    def _get_consumer(self, **kwargs):
+        _kwargs = self.ssl_config.copy()
+        _kwargs.update(bootstrap_servers=self.bootstrap_servers)
+        _kwargs.update(kwargs)
+        return KafkaConsumer(**_kwargs)
 
 
 class ScrapyKafkaTopicWriter(KafkaTopicWriter):
