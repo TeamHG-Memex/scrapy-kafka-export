@@ -75,24 +75,20 @@ the following package data should be added to ``setup.py``::
 """
 import logging
 
-from kafka import KafkaConsumer
-from retrying import retry
 from scrapy import signals
 from scrapy.exceptions import NotConfigured
-from scrapy.exporters import PythonItemExporter
 
-from .utils import just_log_exception
 from .config import KafkaItemExporterConfigs
-from .writer import KafkaTopicWriter
+from .writer import UnknownTopicError, ScrapyKafkaTopicWriter
 
 logger = logging.getLogger(__name__)
+
 
 class KafkaItemExporterExtension(object):
     """ Kafka extension for writing items to a kafka topic """
     def __init__(self, crawler):
-        self.item_exporter = PythonItemExporter(binary=False)
         self.config = KafkaItemExporterConfigs(crawler.settings)
-        self.sources_writer = None
+        self.item_writer = None
 
         crawler.signals.connect(self.spider_opened, signals.spider_opened)
         crawler.signals.connect(self.spider_closed, signals.spider_closed)
@@ -110,40 +106,23 @@ class KafkaItemExporterExtension(object):
 
         self.initialize_kafka_producer(spider)
 
-    @property
-    @retry(wait_fixed=60000, retry_on_exception=just_log_exception)
-    def topic_list(self):
-        consumer = KafkaConsumer(bootstrap_servers=self.config.kafka_brokers,
-                                 **self.config.ssl_config)
-        topics = consumer.topics()
-        consumer.close()
-        return topics
-
     def initialize_kafka_producer(self, spider):
-        kafka_topic = self.config.kafka_topic
-        if kafka_topic not in self.topic_list:
-            logger.error("Topic %s does not exists, items won't "
-                         "be send to Kafka.", kafka_topic)
+        try:
+            self.item_writer = ScrapyKafkaTopicWriter(
+                bootstrap_servers=self.config.kafka_brokers,
+                topic=self.config.kafka_topic,
+                batch_size=self.config.batch_size,
+                **self.config.ssl_config
+            )
+        except UnknownTopicError as e:
+            logger.error(e.args[0])
             raise NotConfigured
-
-        self.sources_writer = KafkaTopicWriter(self.config.kafka_brokers,
-                                               kafka_topic,
-                                               self.config.batch_size,
-                                               **self.config.ssl_config)
         logger.debug("Kafka writer initialized.")
 
     def spider_closed(self, spider):
-        if self.sources_writer is not None:
-            self.sources_writer.close()
+        if self.item_writer is not None:
+            self.item_writer.close()
 
     def process_item_scraped(self, item, response, spider):
         if self.config.is_enabled:
-            self.push_to_kafka(item)
-
-    def push_to_kafka(self, item):
-        key = None
-        if item and '_id' in item:
-            key = item.get('_id')
-        msg = self.item_exporter.export_item(item)
-        self.sources_writer.write(key, msg)
-
+            self.item_writer.write_item(item)
