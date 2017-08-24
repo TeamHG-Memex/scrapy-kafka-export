@@ -122,6 +122,7 @@ class KafkaItemExporterExtension(object):
         )
         logger.info("Kafka item writer initialized, writing to topic %s." %
                     self.item_writer.topic)
+        self._configure_kafka_logging()
 
     def spider_closed(self, spider):
         if self.item_writer is not None:
@@ -129,3 +130,8 @@ class KafkaItemExporterExtension(object):
 
     def process_item_scraped(self, item, response, spider):
         self.item_writer.write_item(item)
+
+    def _configure_kafka_logging(self):
+        """ Disable logging of sent items """
+        kafka_logger = logging.getLogger('kafka.producer.kafka')
+        kafka_logger.setLevel(logging.INFO)
