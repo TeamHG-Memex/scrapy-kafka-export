@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='scrapy-kafka-export',
-    version='0.1.0',
+    version='0.1.1',
     packages=['scrapy_kafka_export'],
     install_requires=[
         'kafka-python',
