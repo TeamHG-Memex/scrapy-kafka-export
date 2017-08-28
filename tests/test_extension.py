@@ -6,7 +6,7 @@ import string
 from contextlib import contextmanager
 
 import pytest
-from kafka import SimpleClient, SimpleConsumer
+from kafka import KafkaConsumer
 from scrapy.utils.serialize import ScrapyJSONDecoder
 from scrapy.utils.test import get_crawler
 from scrapy_kafka_export import KafkaItemExporterExtension
@@ -15,16 +15,6 @@ from scrapy_kafka_export.writer import UnknownTopicError
 
 def random_string(l):
     return "".join(random.choice(string.ascii_letters) for i in range(l))
-
-def consume_from_kafka(client, topic):
-    consumer = SimpleConsumer(client=client, group=None, topic=topic)
-    consumer.seek(-1, 2)
-    msg = consumer.get_message(block=False, timeout=10)
-    consumer.stop()
-    if msg:
-        deserializer = ScrapyJSONDecoder()
-        return deserializer.decode(msg.message.value.decode('utf8'))
-    raise Exception
 
 def run_command(command):
     import subprocess
@@ -55,9 +45,11 @@ def opened_middleware(crawler):
     finally:
         mw.spider_closed(crawler.spider)
 
-class TestClass:
+class TestKafkaExtension:
     topic = None
     broker = None
+    consumer = None
+    _deserializer = None
 
     @classmethod
     def setup_class(cls):
@@ -66,13 +58,24 @@ class TestClass:
             topic = "%s-%s" % ('topic_test_', random_string(10))
             cls.topic = topic
 
-        cls.client = SimpleClient(cls.broker)
-        output = create_topic(cls.topic)
+        create_topic(cls.topic)
+        cls._deserializer = ScrapyJSONDecoder()
+        cls.consumer = KafkaConsumer(
+            bootstrap_servers=[cls.broker],
+            auto_offset_reset='earliest',
+            group_id=None,
+            value_deserializer=lambda x:
+            cls._deserializer.decode(x.decode('utf8'))
+        )
+        cls.consumer.subscribe([cls.topic])
 
     @classmethod
     def teardown_class(cls):
         output = delete_topic(cls.topic)
-        cls.client.close()
+
+    def consume_message(self):
+        for msg in self.consumer:
+            return msg.value
 
     def test_crawl(self):
         settings = {
@@ -87,7 +90,7 @@ class TestClass:
             item1 = {'_id': '0001', 'body': 'message 01'}
             mw.process_item_scraped(item1, response=None, spider=crawler.spider)
 
-        kafka_item1 = consume_from_kafka(self.client, self.topic)
+        kafka_item1 = self.consume_message()
         print (kafka_item1, item1)
         assert item1 == kafka_item1
 
