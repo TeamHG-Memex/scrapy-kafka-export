@@ -13,7 +13,7 @@ scrapy-kafka-export
    :target: http://codecov.io/github/TeamHG-Memex/scrapy-kafka-export?branch=master
    :alt: Code Coverage
 
-scrapy-kafka-export package provides a Scrapy extension to export items
+``scrapy-kafka-export`` package provides a Scrapy extension to export items
 to Kafka.
 
 License is MIT.
@@ -85,13 +85,13 @@ Settings
 ~~~~~~~~
 
 * ``KAFKA_EXPORT_ENABLED`` - Flag that enables the extension;
-   it is False by default.
+  it is False by default.
 * ``KAFKA_BROKERS`` - List of Kafka brokers in format host:port
 * ``KAFKA_TOPIC`` - Kafka topic where items are going to be sent
 * ``KAFKA_BATCH_SIZE`` - Kafka batch size (100 by default).
 * ``KAFKA_SSL_CONFIG_MODULE`` - name of the project module
 * ``KAFKA_SSL_CACERT_FILE`` - resource path of the Certificate Authority
-    certificate
+  certificate
 * ``KAFKA_SSL_CLIENTCERT_FILE`` - resource path of the client certificate
 * ``KAFKA_SSL_CLIENTKEY_FILE`` - resource path of the client key
 
