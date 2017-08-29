@@ -1,0 +1,31 @@
+language: python
+
+branches:
+    only:
+        - master
+        - /^\d\.\d+$/
+env:
+  global:
+    - KAFKA_BROKER=localhost:9092
+    - KAFKA_BIN=$PWD/kafka/bin
+    - ZOOKEEPER=localhost:2181
+matrix:
+  include:
+    - python: 2.7
+      env: TOXENV=py27
+    - python: 3.4
+      env: TOXENV=py34
+    - python: 3.5
+      env: TOXENV=py35
+    - python: 3.6
+      env: TOXENV=py36
+
+install:
+    - pip install -U pip tox codecov
+
+script:
+    - ./install-kafka.sh
+    - tox
+
+after_success:
+    - codecov
