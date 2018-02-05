@@ -104,3 +104,9 @@ If you want to push Scrapy items to Kafka from a script, instead of using
 ``scrapy_kafka_export.KafkaItemExporterExtension`` use
 ``scrapy_kafka_export.writer.ScrapyKafkaTopicWriter``; see its docstring
 for more.
+
+----
+
+.. image:: https://hyperiongray.s3.amazonaws.com/define-hg.svg
+	:target: https://hyperiongray.com/?pk_campaign=github&pk_kwd=scrapy-kafka-export
+	:alt: define hyperiongray
