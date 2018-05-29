@@ -108,5 +108,5 @@ for more.
 ----
 
 .. image:: https://hyperiongray.s3.amazonaws.com/define-hg.svg
-	:target: https://hyperiongray.com/?pk_campaign=github&pk_kwd=scrapy-kafka-export
+	:target: https://www.hyperiongray.com/?pk_campaign=github&pk_kwd=scrapy-kafka-export
 	:alt: define hyperiongray
