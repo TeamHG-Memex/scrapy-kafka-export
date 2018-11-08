@@ -14,7 +14,9 @@ logger = logging.getLogger(__name__)
 
 class KafkaItemExporterExtension(object):
     """ Kafka extension for writing items to a kafka topic """
+
     def __init__(self, crawler):
+        self.crawler = crawler
         settings = crawler.settings
         if not settings.getbool('KAFKA_EXPORT_ENABLED', False):
             raise NotConfigured
@@ -27,6 +29,7 @@ class KafkaItemExporterExtension(object):
         if ssl_module_name:
             def _load(key):
                 return resource_filename(ssl_module_name, settings.get(key))
+
             self.ssl_config = get_ssl_config(
                 cafile=_load('KAFKA_SSL_CACERT_FILE'),
                 certfile=_load('KAFKA_SSL_CLIENTCERT_FILE'),
@@ -62,6 +65,7 @@ class KafkaItemExporterExtension(object):
 
     def process_item_scraped(self, item, response, spider):
         self.item_writer.write_item(item)
+        self.crawler.stats.inc_value('kafka/produced')
 
     def _configure_kafka_logging(self):
         """ Disable logging of sent items """

@@ -2,7 +2,7 @@
 
 set -eu
 
-MIRROR=http://www-us.apache.org/dist/kafka/0.11.0.0/kafka_2.11-0.11.0.0.tgz
+MIRROR=http://archive.apache.org/dist/kafka/0.11.0.0/kafka_2.11-0.11.0.0.tgz
 test -f kafka.tgz || wget $MIRROR -O kafka.tgz
 # Unpack the kafka over the top of any existing installation
 echo "Unpacking Kafka installation file"
